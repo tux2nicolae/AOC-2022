@@ -4,6 +4,7 @@
  */
 #include "pch.h"
 #include "FStreamReader.h"
+#include "Parse.h"
 
 FStreamReader::FStreamReader(ifstream & aIn)
   : mFileStream(aIn)
@@ -70,6 +71,17 @@ vector<string> FStreamReader::ReadLineAsWords()
     ret.push_back(word);
 
   return ret;
+}
+
+vector<string> FStreamReader::ReadLineAsWords(string separator)
+{
+  vector<string> ret;
+
+  string line;
+  if (!getline(mFileStream, line))
+    return ret;
+
+  return AOC::Explode(line, separator);
 }
 
 vector<string> FStreamReader::ReadLines()

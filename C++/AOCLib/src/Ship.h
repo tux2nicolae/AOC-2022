@@ -19,9 +19,10 @@ struct Ship
   void TurnLeft();
   void TurnRight();
 
-  // changes the direction
   void GoForward(long long step = 1);
   void GoBackward(long long step = 1);
+
+  // changes the direction
   void GoRight(long long step = 1);
   void GoLeft(long long step = 1);
 

@@ -22,6 +22,7 @@ public:
   vector<int>    ReadLineAsNumbers();
   vector<int>    ReadLineAsDigits();
   vector<string> ReadLineAsWords();
+  vector<string> ReadLineAsWords(string separator);
 
   vector<string> ReadLines();
 
