@@ -38,10 +38,31 @@ int main()
   ifstream in("..\\src\\_input.in");
   // ofstream out("..\\src\\_output.out");
 
-  FStreamReader reader(in);
-  vector<int>   v = reader.ReadDataAs<int>();
+  FStreamReader  reader(in);
+  vector<string> v = reader.ReadLines();
 
+  vector<int> e;
+
+  int s = 0;
   // part 1
+  for (const auto & line : v)
+  {
+    if (line.empty())
+    {
+      e.push_back(s);
+      s = 0;
+    }
+    else
+    {
+      s += stoi(line);
+    }
+  }
+
+  e.push_back(s);
+
+  sort(begin(e), end(e), greater<int>());
+
+  cout << e[0] + e[1] + e[2];
 
   // out
   // FStreamWriter writer(out);
