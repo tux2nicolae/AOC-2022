@@ -49,6 +49,9 @@ char convertToABC(int a)
 
   if (a == 'Z')
     return 'C';
+
+  assert(false);
+  return 0;
 }
 
 int wonScore(char a, char b)
