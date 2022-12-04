@@ -51,10 +51,10 @@ int main()
     auto   matches = AOC::ExtractMatches(line, "(.*)-(.*),(.*)-(.*)");
 
     pair<int, int> a, b;
-    a.first  = stoi(matches[1]);
-    a.second = stoi(matches[2]);
-    b.first  = stoi(matches[3]);
-    b.second = stoi(matches[4]);
+    a.first  = stoi(matches[0]);
+    a.second = stoi(matches[1]);
+    b.first  = stoi(matches[2]);
+    b.second = stoi(matches[3]);
 
     // b is in a
     if (a.first <= b.first && b.second <= a.second)

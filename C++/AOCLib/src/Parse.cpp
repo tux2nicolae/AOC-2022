@@ -43,7 +43,10 @@ vector<string> AOC::ExtractMatches(const string & str, const string & regexStr)
   smatch matches;
   regex_match(str, matches, regex(regexStr));
 
-  return { matches.begin(), matches.end() };
+  if (matches.size() == 0)
+    return {};
+
+  return { matches.begin() + 1, matches.end() };
 }
 
 int AOC::BinaryStringToInt(string_view binaryValue)
