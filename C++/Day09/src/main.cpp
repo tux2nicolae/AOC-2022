@@ -57,6 +57,7 @@ int main()
 
     while (moveCount--)
     {
+      // move first head
       if (moveDirection == "L")
         knots[0] = knots[0].GetLeft();
       else if (moveDirection == "R")
@@ -66,6 +67,7 @@ int main()
       else if (moveDirection == "D")
         knots[0] = knots[0].GetBottom();
 
+      // follow next point
       for (int i = 0; i < knots.size() - 1; i++)
       {
         auto & head = knots[i];
@@ -85,9 +87,11 @@ int main()
             diff.y /= AOC::Abs(diff.y);
 
           tail += diff;
-          visited.insert(knots.back());
         }
       }
+
+      // mark tail as visited
+      visited.insert(knots.back());
     }
   }
 
