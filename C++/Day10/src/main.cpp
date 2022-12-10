@@ -36,7 +36,16 @@ using namespace std;
 int cicle = 0;
 int x     = 1;
 
-vector<vector<char>> CRT(6, vector<char>(40, ' '));
+vector<int>    strengths;
+vector<string> CRT(6, string(40, ' '));
+
+void checkStrength(int cicle)
+{
+  if (cicle == 20 || cicle == 60 || cicle == 100 || cicle == 140 || cicle == 180 || cicle == 220)
+  {
+    strengths.push_back(cicle * x);
+  }
+}
 
 void draw(int cicle, int sprite)
 {
@@ -65,8 +74,6 @@ int main()
 
   FStreamWriter writter(out);
 
-  vector<int> strengths;
-
   // lines
   for (auto & line : v)
   {
@@ -79,54 +86,32 @@ int main()
       int value = stoi(tokens[1]);
 
       cicle += 1;
-      draw(cicle, x);
 
-      if (cicle == 20 || cicle == 60 || cicle == 100 || cicle == 140 || cicle == 180 ||
-          cicle == 220)
-      {
-        strengths.push_back(cicle * x);
-      }
+      draw(cicle, x);
+      checkStrength(cicle);
 
       cicle += 1;
       draw(cicle, x);
-
-      if (cicle == 20 || cicle == 60 || cicle == 100 || cicle == 140 || cicle == 180 ||
-          cicle == 220)
-      {
-        strengths.push_back(cicle * x);
-      }
+      checkStrength(cicle);
 
       x += value;
     }
     else
     {
       cicle += 1;
+
       draw(cicle, x);
-
-      if (cicle == 20 || cicle == 60 || cicle == 100 || cicle == 140 || cicle == 180 ||
-          cicle == 220)
-      {
-        strengths.push_back(cicle * x);
-      }
+      checkStrength(cicle);
     }
   }
 
-  int sum = 0;
-  for (auto x : strengths)
+  // part 1
+  cout << accumulate(begin(strengths), end(strengths), 0);
+
+  // part 2 (see _output.out)
+  for (const auto & line : CRT)
   {
-    sum += x;
-  }
-
-  cout << sum;
-
-  for (const auto & row : CRT)
-  {
-    for (const auto & element : row)
-    {
-      out << element << " ";
-    }
-
-    out << endl;
+    out << line << endl;
   }
 
   return 0;
