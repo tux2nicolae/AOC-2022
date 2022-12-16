@@ -4,6 +4,7 @@
  */
 #include <algorithm>
 #include <assert.h>
+#include <bitset>
 #include <deque>
 #include <fstream>
 #include <iostream>
@@ -34,17 +35,21 @@ using namespace std;
 #include "../../AOCLib/src/Time.h"
 #include "../../AOCLib/src/Util.h"
 
-unordered_map<string, int>            valveRates;
-unordered_map<string, vector<string>> valveChilds;
-unordered_map<string, bool>           valveOpened;
+unordered_map<string, int> valveNameToId;
+vector<int>                valveRates(100);
+vector<vector<long long>>  valveChilds(100);
 
-vector<unordered_map<string, pair<int, int>>> memo(30, unordered_map<string, pair<int, int>>());
+bitset<64> valveOpened;
 
-unordered_set<string>      valves;
-unordered_map<string, int> valveBits;
+vector<unordered_map<unsigned long long, pair<int, int>>> memo(
+  30, unordered_map<unsigned long long, pair<int, int>>());
 
 void ParseInput(const vector<string> & lines)
 {
+  unordered_map<string, int>            valveRatesStr;
+  unordered_map<string, vector<string>> valveChildsStr;
+
+  unordered_set<string> existingValves;
   for (int i = 0; i < lines.size(); i++)
   {
     const auto & line = lines[i];
@@ -54,61 +59,70 @@ void ParseInput(const vector<string> & lines)
 
     assert(matches.size() == 3);
 
-    valveRates[matches[0]]  = atoi(matches[1].c_str());
-    valveChilds[matches[0]] = AOC::Explode(matches[2], ", ");
+    valveRatesStr[matches[0]]  = atoi(matches[1].c_str());
+    valveChildsStr[matches[0]] = AOC::Explode(matches[2], ", ");
 
-    valves.insert(matches[0]);
-    for (auto & child : valveChilds[matches[0]])
-      valves.insert(child);
+    existingValves.insert(matches[0]);
+    for (auto & child : valveChildsStr[matches[0]])
+      existingValves.insert(child);
   }
 
   int i = 0;
-  for (auto & valve : valves)
-    valveBits[valve] = i++;
-}
+  for (auto & valve : existingValves)
+    valveNameToId[valve] = i++;
 
-string ComputeMemoHash(const string &                      node1,
-                       const string &                      node2,
-                       const unordered_map<string, bool> & valveOpened)
-{
-  unsigned long long hashInt = 0;
-  for (const auto & [valve, opened] : valveOpened)
+  for (const auto & valve : valveRatesStr)
   {
-    if (opened)
-      hashInt |= (1ll << valveBits[valve]);
-  }
+    valveRates[valveNameToId[valve.first]] = valve.second;
 
-  return node1 + node2 + to_string(hashInt);
+    for (const auto & childStr : valveChildsStr[valve.first])
+    {
+      valveChilds[valveNameToId[valve.first]].push_back(valveNameToId[childStr]);
+    }
+  }
 }
 
-optional<int> GetMemoCost(const string & node1, const string & node2, int cost, int seconds)
+unsigned long long ComputeMemoHash(const long long    node1,
+                                   const long long    node2,
+                                   const bitset<64> & valveOpened)
 {
-  auto it = memo[seconds].find(ComputeMemoHash(node1, node2, valveOpened));
-  if (it == memo[seconds].end())
-    return nullopt;
+  auto hashNode1 = node1;
+  auto hashNode2 = node2;
 
-  auto [inputCost, outputCost] = (it->second);
-  if (inputCost >= cost)
-    return outputCost;
+  unsigned long long hashOpenedValves = valveOpened.to_ullong();
+  return (hashNode1 * valveNameToId.size() + hashNode2) * (1ll << valveNameToId.size()) +
+         hashOpenedValves;
+}
+
+optional<int> GetMemoCost(const long long node1,
+                          const long long node2,
+                          int             currentCost,
+                          int             seconds)
+{
+  auto hash = ComputeMemoHash(node1, node2, valveOpened);
+
+  auto it = memo[seconds].find(hash);
+  if (it != memo[seconds].end())
+    return (*it).second.second;
 
   return nullopt;
 }
 
-void SetMemoCost(const string & node1, const string & node2, int cost, int seconds, int memocost)
+void SetMemoCost(long long node1, long long node2, int currentCost, int seconds, int memocost)
 {
-  auto & [inputCost, outputCost] = memo[seconds][ComputeMemoHash(node1, node2, valveOpened)];
-  if (outputCost < memocost)
-  {
-    assert(inputCost <= cost);
+  auto hash = ComputeMemoHash(node1, node2, valveOpened);
 
-    inputCost  = cost;
-    outputCost = memocost;
+  auto & [inputCostPlus, outputCostPlus] = memo[seconds][hash];
+  if (outputCostPlus < memocost)
+  {
+    assert(inputCostPlus <= currentCost);
+
+    inputCostPlus  = currentCost;
+    outputCostPlus = memocost;
   }
 }
 
-unordered_map<string, int> visited;
-
-int traverse(const string & node1, const string & node2, int cost, int seconds)
+int traverse(const long long node1, const long long node2, int cost, int seconds)
 {
   if (!seconds)
     return 0;
@@ -125,15 +139,8 @@ int traverse(const string & node1, const string & node2, int cost, int seconds)
 
     for (const auto & child : valveChilds[node2])
     {
-      if (visited[child] > 10)
-        continue;
-
-      visited[child]++;
-
       openMoveCost =
         max(openMoveCost, traverse(node1, child, cost + valveRates[node1], seconds - 1));
-
-      visited[child]--;
     }
 
     valveOpened[node1] = false;
@@ -147,15 +154,8 @@ int traverse(const string & node1, const string & node2, int cost, int seconds)
 
     for (const auto & child : valveChilds[node1])
     {
-      if (visited[child] > 10)
-        continue;
-
-      visited[child]++;
-
       moveOpenCost =
         max(moveOpenCost, traverse(child, node2, cost + valveRates[node2], seconds - 1));
-
-      visited[child]--;
     }
 
     valveOpened[node2] = false;
@@ -180,21 +180,9 @@ int traverse(const string & node1, const string & node2, int cost, int seconds)
   int traverseTraverseCost = 0;
   for (const auto & child1 : valveChilds[node1])
   {
-    if (visited[child1] > 10)
-      continue;
-
     for (const auto & child2 : valveChilds[node2])
     {
-      if (visited[child1] > 10)
-        continue;
-
-      visited[child1]++;
-      visited[child2]++;
-
       traverseTraverseCost = max(traverseTraverseCost, traverse(child1, child2, cost, seconds - 1));
-
-      visited[child1]--;
-      visited[child2]--;
     }
   }
 
@@ -203,45 +191,6 @@ int traverse(const string & node1, const string & node2, int cost, int seconds)
   SetMemoCost(node1, node2, cost, seconds, cost + totalCost);
   return cost + totalCost;
 }
-
-// part 1
-// int traverse(string node1, int cost, int seconds)
-//{
-//   if (!seconds)
-//     return 0;
-//
-//   auto memoCost = GetMemoCost(node, cost, seconds);
-//   if (memoCost)
-//     return *memoCost;
-//
-//   // open
-//   int openedCost = 0;
-//   if (valveRates[node] && !valveOpened[node])
-//   {
-//     valveOpened[node] = true;
-//     openedCost = traverse(node, cost + valveRates[node], seconds - 1);
-//     valveOpened[node] = false;
-//   }
-//
-//   // move to another value
-//   vector<int> traverseCosts;
-//   for (auto child : valveChilds[node])
-//   {
-//     traverseCosts.push_back(traverse(child, cost, seconds - 1));
-//   }
-//
-//   sort(begin(traverseCosts), end(traverseCosts), greater<int>());
-//
-//   // chose two actions
-//   int optimalCost = max(openedCost, traverseCosts[0]);
-//   // if (traverseCosts.size() > 1)
-//   //{
-//   //   optimalCost = max(optimalCost, traverseCosts[0] + traverseCosts[1]);
-//   // }
-//
-//   SetMemoCost(node, cost, seconds, cost + optimalCost);
-//   return cost + optimalCost;
-// }
 
 int main()
 {
@@ -252,7 +201,7 @@ int main()
   auto          lines = reader.ReadLines();
 
   ParseInput(lines);
-  cout << traverse("AA", "AA", 0, 26);
+  cout << traverse(valveNameToId["AA"], valveNameToId["AA"], 0, 26);
 
   return 0;
 }
