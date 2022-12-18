@@ -36,7 +36,7 @@ struct Point
   Point GetNeighbour(const char direction);
   Point GetNeighbour(const string & direction);
 
-  vector<Point> GetDirectNeighbours() const;
+  vector<Point> GetDirect2DNeighbours() const;
   vector<Point> GetDirect3DNeighbours() const;
   vector<Point> GetAll2DNeighbours() const;
   vector<Point> GetAll3DNeighbours() const;

@@ -191,24 +191,21 @@ AOC::Point AOC::Point::GetNeighbour(const string & direction)
   return neighbour;
 }
 
-vector<AOC::Point> AOC::Point::GetDirectNeighbours() const
+vector<AOC::Point> AOC::Point::GetDirect2DNeighbours() const
 {
   return { GetTop(), GetRight(), GetBottom(), GetLeft() };
 }
 
 vector<AOC::Point> AOC::Point::GetDirect3DNeighbours() const
 {
-  vector<AOC::Point> neighbours = GetDirectNeighbours();
+  vector<AOC::Point> neighbours = GetDirect2DNeighbours();
 
-  // neighbours
   AOC::Point nextSlice = *this;
   nextSlice.z          = z - 1;
-
   neighbours.push_back(nextSlice);
 
   nextSlice   = *this;
   nextSlice.z = z + 1;
-
   neighbours.push_back(nextSlice);
 
   assert(neighbours.size() == 6);

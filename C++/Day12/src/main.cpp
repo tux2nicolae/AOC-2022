@@ -71,7 +71,7 @@ int main()
     auto current = q.front();
     q.pop();
 
-    for (auto & neighbour : current.GetDirectNeighbours())
+    for (auto & neighbour : current.GetDirect2DNeighbours())
     {
       if (!neighbour.IsInBoundary({ 0, 0 }, { (int)cost.size() - 1, (int)cost[0].size() - 1 }))
         continue;
