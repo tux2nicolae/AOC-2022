@@ -23,21 +23,22 @@ struct Point
 
   bool IsInBoundary(const Point & from, const Point & to);
 
-  Point GetLeft();
-  Point GetRight();
-  Point GetTop();
-  Point GetBottom();
+  Point GetLeft() const;
+  Point GetRight() const;
+  Point GetTop() const;
+  Point GetBottom() const;
 
-  Point GetTopLeft();
-  Point GetTopRight();
-  Point GetBottomLeft();
-  Point GetBottomRight();
+  Point GetTopLeft() const;
+  Point GetTopRight() const;
+  Point GetBottomLeft() const;
+  Point GetBottomRight() const;
 
   Point GetNeighbour(const char direction);
   Point GetNeighbour(const string & direction);
 
-  vector<Point> GetDirectNeighbours();
-  vector<Point> GetAll2DNeighbours();
+  vector<Point> GetDirectNeighbours() const;
+  vector<Point> GetDirect3DNeighbours() const;
+  vector<Point> GetAll2DNeighbours() const;
   vector<Point> GetAll3DNeighbours() const;
   vector<Point> GetAll4DNeighbours() const;
 

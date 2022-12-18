@@ -104,42 +104,42 @@ bool AOC::Point::IsInBoundary(const Point & from, const Point & to)
           z <= to.z && w <= to.w);
 }
 
-AOC::Point AOC::Point::GetLeft()
+AOC::Point AOC::Point::GetLeft() const
 {
   return { x - 1, y, z, w };
 }
 
-AOC::Point AOC::Point::GetRight()
+AOC::Point AOC::Point::GetRight() const
 {
   return { x + 1, y, z, w };
 }
 
-AOC::Point AOC::Point::GetTop()
+AOC::Point AOC::Point::GetTop() const
 {
   return { x, y - 1, z, w };
 }
 
-AOC::Point AOC::Point::GetBottom()
+AOC::Point AOC::Point::GetBottom() const
 {
   return { x, y + 1, z, w };
 }
 
-AOC::Point AOC::Point::GetTopLeft()
+AOC::Point AOC::Point::GetTopLeft() const
 {
   return GetTop().GetLeft();
 }
 
-AOC::Point AOC::Point::GetTopRight()
+AOC::Point AOC::Point::GetTopRight() const
 {
   return GetTop().GetRight();
 }
 
-AOC::Point AOC::Point::GetBottomLeft()
+AOC::Point AOC::Point::GetBottomLeft() const
 {
   return GetBottom().GetLeft();
 }
 
-AOC::Point AOC::Point::GetBottomRight()
+AOC::Point AOC::Point::GetBottomRight() const
 {
   return GetBottom().GetRight();
 }
@@ -191,12 +191,31 @@ AOC::Point AOC::Point::GetNeighbour(const string & direction)
   return neighbour;
 }
 
-vector<AOC::Point> AOC::Point::GetDirectNeighbours()
+vector<AOC::Point> AOC::Point::GetDirectNeighbours() const
 {
   return { GetTop(), GetRight(), GetBottom(), GetLeft() };
 }
 
-vector<AOC::Point> AOC::Point::GetAll2DNeighbours()
+vector<AOC::Point> AOC::Point::GetDirect3DNeighbours() const
+{
+  vector<AOC::Point> neighbours = GetDirectNeighbours();
+
+  // neighbours
+  AOC::Point nextSlice = *this;
+  nextSlice.z          = z - 1;
+
+  neighbours.push_back(nextSlice);
+
+  nextSlice   = *this;
+  nextSlice.z = z + 1;
+
+  neighbours.push_back(nextSlice);
+
+  assert(neighbours.size() == 6);
+  return neighbours;
+}
+
+vector<AOC::Point> AOC::Point::GetAll2DNeighbours() const
 {
   return { GetTopLeft(), GetTop(),        GetTopRight(), GetLeft(),
            GetRight(),   GetBottomLeft(), GetBottom(),   GetBottomRight() };
