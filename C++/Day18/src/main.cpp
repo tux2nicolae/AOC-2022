@@ -43,20 +43,10 @@ int main()
 
   FStreamReader reader(in);
 
-  auto lines = reader.ReadLines();
-
   vector<vector<int>> data;
-  for (auto & line : lines)
+  while (reader.IsValid())
   {
-    data.push_back({});
-
-    auto xxx = AOC::Explode(line, ',');
-
-    transform(begin(xxx), end(xxx), back_inserter(data.back()),
-              [](string number)
-              {
-                return atoi(number.c_str());
-              });
+    data.push_back(reader.ReadLineSeparatedByCharAs());
   }
 
   for (int i = 0; i < data.size(); i++)
@@ -69,19 +59,17 @@ int main()
       auto first  = AOC::Point({ a[0], a[1], a[2] });
       auto second = AOC::Point({ b[0], b[1], b[2] });
 
+      // asure the collision map has the elements
       collisions[first];
       collisions[second];
 
       for (const auto & neighbour : first.GetDirect3DNeighbours())
       {
         if (neighbour == second)
+        {
           collisions[first].insert(second);
-      }
-
-      for (const auto & neighbour : second.GetDirect3DNeighbours())
-      {
-        if (neighbour == first)
           collisions[second].insert(first);
+        }
       }
     }
   }
