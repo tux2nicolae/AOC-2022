@@ -105,26 +105,13 @@ vector<Blueprint> ParseInput(const vector<string> & lines)
   return blueprints;
 }
 
-using Memo = vector<unordered_map<string, int>>;
+using Hash = tuple<int, int, int, int, int, int>;
+using Memo = vector<map<Hash, int>>;
 
-string ComputeMemoHash(const vector<Robot> & robots, const vector<int> & minerals)
+Hash ComputeMemoHash(const vector<Robot> & robots, const vector<int> & minerals)
 {
-  string hash;
-
-  long long robotsHash = 0;
-  for (auto & robot : robots)
-    robotsHash = robotsHash * 100 + robot.count;
-
-  hash += to_string(robotsHash);
-  hash += ",";
-
-  for (auto & mineral : minerals)
-  {
-    hash += to_string(mineral);
-    hash += ",";
-  }
-
-  return hash;
+  return tie(robots[0].count, robots[1].count, robots[2].count, minerals[0], minerals[1],
+             minerals[2]);
 }
 
 optional<int> GetMemoCost(Memo &                memo,
@@ -161,7 +148,7 @@ int collectMinerals(Memo & memo, vector<Robot> & robots, vector<int> & minerals,
 
   // build a new robot
   int maxGeode = 0;
-  for (int i = robots.size() - 1; i >= 0; i--)
+  for (int i = (int)robots.size() - 1; i >= 0; i--)
   {
     auto & robot    = robots[i];
     bool   wasBuild = true;
@@ -176,6 +163,9 @@ int collectMinerals(Memo & memo, vector<Robot> & robots, vector<int> & minerals,
 
     if (wasBuild)
     {
+      // comment for part 1
+      continueWithoutBuilding = false;
+
       // collect minerals
       for (const auto & robot : robots)
       {
@@ -203,17 +193,11 @@ int collectMinerals(Memo & memo, vector<Robot> & robots, vector<int> & minerals,
     {
       minerals[mineralType] += cost;
     }
-
-    if (wasBuild)
-    {
-      continueWithoutBuilding = false;
-    }
   }
 
   // without building a robot
   if (continueWithoutBuilding)
   {
-    // collect minerals
     for (const auto & robot : robots)
     {
       minerals[robot.type] += robot.count;
@@ -256,7 +240,13 @@ int main()
 
     vector<int> minerals(5);
 
-    auto geode = collectMinerals(memo, robots, minerals, 32);
+    // part1
+    // const auto deep = 24;
+
+    // part2
+    const auto deep = 32;
+
+    auto geode = collectMinerals(memo, robots, minerals, deep);
 
     cout << blueprint.id << "*" << geode << "=" << blueprint.id * geode << endl;
     sum += blueprint.id * geode;
