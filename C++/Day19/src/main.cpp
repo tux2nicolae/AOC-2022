@@ -157,6 +157,8 @@ int collectMinerals(Memo & memo, vector<Robot> & robots, vector<int> & minerals,
   if (memoCost)
     return *memoCost;
 
+  bool continueWithoutBuilding = true;
+
   // build a new robot
   int maxGeode = 0;
   for (int i = robots.size() - 1; i >= 0; i--)
@@ -201,9 +203,15 @@ int collectMinerals(Memo & memo, vector<Robot> & robots, vector<int> & minerals,
     {
       minerals[mineralType] += cost;
     }
+
+    // if (wasBuild && robot.type != MineralType::obsidian)
+    //{
+    //   continueWithoutBuilding = false;
+    // }
   }
 
   // without building a robot
+  if (continueWithoutBuilding)
   {
     // collect minerals
     for (const auto & robot : robots)
@@ -232,7 +240,7 @@ int main()
   FStreamReader reader(in);
   auto          lines = reader.ReadLines();
 
-  int maxGeode = 0;
+  int sum = 0;
 
   auto blueprints = ParseInput(lines);
   for (auto & blueprint : blueprints)
@@ -248,14 +256,14 @@ int main()
     vector<int> minerals(5);
 
     auto geode = collectMinerals(memo, robots, minerals, 24);
-    maxGeode   = max(maxGeode, geode);
 
     cout << blueprint.id << "*" << geode << "=" << blueprint.id * geode << endl;
+    sum += blueprint.id * geode;
   }
 
   cout << endl;
   cout << endl;
-  cout << maxGeode;
+  cout << sum;
 
   return 0;
 }
