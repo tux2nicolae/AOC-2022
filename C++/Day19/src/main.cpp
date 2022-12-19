@@ -204,10 +204,10 @@ int collectMinerals(Memo & memo, vector<Robot> & robots, vector<int> & minerals,
       minerals[mineralType] += cost;
     }
 
-    // if (wasBuild && robot.type != MineralType::obsidian)
-    //{
-    //   continueWithoutBuilding = false;
-    // }
+    if (wasBuild)
+    {
+      continueWithoutBuilding = false;
+    }
   }
 
   // without building a robot
@@ -240,12 +240,13 @@ int main()
   FStreamReader reader(in);
   auto          lines = reader.ReadLines();
 
-  int sum = 0;
+  int       sum     = 0;
+  long long product = 1;
 
   auto blueprints = ParseInput(lines);
   for (auto & blueprint : blueprints)
   {
-    Memo memo(30);
+    Memo memo(35);
 
     vector<Robot> robots;
     robots.push_back(Robot{ 1, MineralType::ore, blueprint.oreRobot.getCosts() });
@@ -255,15 +256,18 @@ int main()
 
     vector<int> minerals(5);
 
-    auto geode = collectMinerals(memo, robots, minerals, 24);
+    auto geode = collectMinerals(memo, robots, minerals, 32);
 
     cout << blueprint.id << "*" << geode << "=" << blueprint.id * geode << endl;
     sum += blueprint.id * geode;
+    product *= geode;
   }
 
   cout << endl;
   cout << endl;
   cout << sum;
+  cout << endl;
+  cout << product;
 
   return 0;
 }
