@@ -46,64 +46,103 @@ int main()
 
   vector<pair<int, int>> numbers;
   for (int i = 0; i < lines.size(); i++)
+  {
     numbers.push_back({ lines[i], i });
+  }
 
   auto computeDestination = [&](vector<pair<int, int>>::iterator from, int count)
   {
+    assert(from == begin(numbers) || from == end(numbers) - 1);
+
     auto fromPosition = from - begin(numbers);
-    auto toPosition   = fromPosition + count;
+    auto toPosition   = (fromPosition + count + 10 * numbers.size()) % numbers.size();
 
-    // some normalization
-    if (toPosition <= 0 || numbers.size() <= toPosition)
-    {
-      toPosition += toPosition <= 0 ? -1 : +1;
-    }
-
-    toPosition += numbers.size();
-
-    auto to = begin(numbers) + (toPosition % numbers.size());
-    return to;
+    return begin(numbers) + toPosition;
   };
 
   for (int i = 0; i < numbers.size(); i++)
   {
-    auto from = find_if(begin(numbers), end(numbers),
-                        [&](const pair<int, int> & number)
-                        {
-                          return number.second == i;
-                        });
+    auto it = find_if(begin(numbers), end(numbers),
+                      [=](pair<int, int> nr)
+                      {
+                        return nr.second == i;
+                      });
 
-    assert(from != end(numbers));
+    assert(it != end(numbers));
 
-    auto to = computeDestination(from, from->first);
-    if (from < to)
+    if (0 <= it->first)
     {
-      // simple rotation to the left
-      std::rotate(from, from + 1, to + 1);
+      auto myNumber = it->first;
+
+      // bring to front
+      std::rotate(begin(numbers), it, end(numbers));
+      assert(numbers.front().first == myNumber);
+
+      auto from = begin(numbers);
+      auto to   = computeDestination(from, numbers.front().first);
+
+      assert(from <= to);
+      if (from < to)
+      {
+        std::rotate(from, from + 1, to + 1);
+      }
     }
-    else if (from > to)
+    else
     {
-      // simple rotation to the right
-      std::rotate(to, from, from + 1);
+      auto myNumber = it->first;
+
+      // bring to back
+      if (it != end(numbers) - 1)
+      {
+        std::rotate(begin(numbers), it + 1, end(numbers));
+      }
+
+      assert((numbers.end() - 1)->first == myNumber);
+
+      auto from = computeDestination(end(numbers) - 1, numbers.back().first);
+      auto to   = end(numbers) - 1;
+
+      assert(from <= to);
+      if (from < to)
+      {
+        std::rotate(from, to, to + 1);
+      }
     }
 
     for (int i = 0; i < numbers.size(); i++)
     {
-      std::cout << numbers[i].first << " ";
+      out << numbers[i].first << " ";
     }
 
-    std::cout << endl;
+    out << endl;
   }
 
   auto zeroIt = find_if(begin(numbers), end(numbers),
-                        [&](const pair<int, int> & number)
+                        [](pair<int, int> nr)
                         {
-                          return number.first == 0;
+                          return nr.first == 0;
                         });
-  std::cout << endl;
-  std::cout << computeDestination(zeroIt, 1000)->first << endl;
-  std::cout << computeDestination(zeroIt, 2000)->first << endl;
-  std::cout << computeDestination(zeroIt, 3000)->first << endl;
+
+  auto count = count_if(begin(numbers), end(numbers),
+                        [=](pair<int, int> nr)
+                        {
+                          return nr.second == 0;
+                        });
+
+  assert(count == 1);
+  std::rotate(begin(numbers), zeroIt, end(numbers));
+
+  // auto a = numbers[1000].first;
+  // auto b = numbers[2000].first;
+  // auto c = numbers[3000].first;
+
+  // std::cout << endl;
+  // std::cout << a << endl;
+  // std::cout << b << endl;
+  // std::cout << c << endl;
+
+  // std::cout << endl;
+  // cout << a + b + c;
 
   return 0;
 }
