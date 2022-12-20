@@ -44,87 +44,52 @@ int main()
   FStreamReader reader(in);
   auto          lines = reader.ReadDataAs<long long>();
 
+  // part 1
+  // auto mixCount      = 1;
+  // auto decriptionKey = 1;
+
+  // part 2
+  auto mixCount      = 10;
+  auto decriptionKey = 811589153ll;
+
   vector<pair<long long, long long>> numbers;
   for (long long i = 0; i < lines.size(); i++)
   {
-    numbers.push_back({ lines[i] * 811589153, i });
+    numbers.push_back({ lines[i] * decriptionKey, i });
   }
 
-  auto computeDestination = [&](vector<pair<long long, long long>>::iterator from, long long count)
+  auto computeDestination =
+    [&](vector<pair<long long, long long>>::iterator fromIt, long long count)
   {
-    assert(from == begin(numbers) || from == end(numbers) - 1);
+    const long long modulo = numbers.size() - 1;
 
-    auto fromPosition = from - begin(numbers);
-    auto toPosition   = (fromPosition + count + 10 * numbers.size()) % numbers.size();
+    auto fromPosition = fromIt - begin(numbers);
+    auto toPosition   = (fromPosition + count % modulo + modulo) % modulo;
 
     return begin(numbers) + toPosition;
   };
 
-  long long mixCount = 10;
   while (mixCount--)
   {
     for (long long i = 0; i < numbers.size(); i++)
     {
-      auto it = find_if(begin(numbers), end(numbers),
-                        [=](pair<long long, long long> nr)
-                        {
-                          return nr.second == i;
-                        });
+      auto from = find_if(begin(numbers), end(numbers),
+                          [=](pair<long long, long long> nr)
+                          {
+                            return nr.second == i;
+                          });
 
-      assert(it != end(numbers));
+      assert(from != end(numbers));
 
-      if (0 <= it->first)
+      auto to = computeDestination(from, from->first);
+      if (from < to)
       {
-        long long count = it->first % (numbers.size() - 1);
-
-        // bring to front
-        std::rotate(begin(numbers), it, end(numbers));
-
-        auto current = 0;
-        while (count--)
-        {
-          auto next = current + 1;
-          if (next == numbers.size())
-            next = 0;
-
-          swap(numbers[current], numbers[next]);
-
-          current++;
-          if (current == numbers.size())
-            current = 0;
-        }
+        std::rotate(from, from + 1, to + 1);
       }
       else
       {
-        auto count = AOC::Abs(it->first) % (numbers.size() - 1);
-
-        // bring to back
-        if (it != end(numbers) - 1)
-        {
-          std::rotate(begin(numbers), it + 1, end(numbers));
-        }
-
-        long long current = numbers.size() - 1;
-        while (count--)
-        {
-          auto prev = current - 1;
-          if (prev == -1)
-            prev = numbers.size() - 1;
-
-          swap(numbers[current], numbers[prev]);
-
-          current--;
-          if (current < 0)
-            current = numbers.size() - 1;
-        }
+        std::rotate(to, from, from + 1);
       }
-
-      // for (long long i = 0; i < numbers.size(); i++)
-      //{
-      //   out << numbers[i].first << " ";
-      // }
-
-      // out << endl;
     }
   }
 
@@ -134,26 +99,12 @@ int main()
                           return nr.first == 0;
                         });
 
-  auto count = count_if(begin(numbers), end(numbers),
-                        [=](pair<long long, long long> nr)
-                        {
-                          return nr.second == 0;
-                        });
-
-  assert(count == 1);
-  std::rotate(begin(numbers), zeroIt, end(numbers));
-
-  auto a = numbers[1000].first;
-  auto b = numbers[2000].first;
-  auto c = numbers[3000].first;
+  auto a = numbers[(distance(numbers.begin(), zeroIt) + 1000) % numbers.size()].first;
+  auto b = numbers[(distance(numbers.begin(), zeroIt) + 2000) % numbers.size()].first;
+  auto c = numbers[(distance(numbers.begin(), zeroIt) + 3000) % numbers.size()].first;
 
   std::cout << endl;
-  std::cout << a << endl;
-  std::cout << b << endl;
-  std::cout << c << endl;
-
-  std::cout << endl;
-  cout << a + b + c;
+  std::cout << a << " + " << b << " + " << c << " = " << a + b + c << endl;
 
   return 0;
 }
