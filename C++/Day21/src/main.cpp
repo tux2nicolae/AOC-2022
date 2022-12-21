@@ -75,15 +75,15 @@ unordered_map<string, Monkey> ParseInput(const vector<string> & lines)
   return graph;
 }
 
-tuple<long long, bool, string> yell(unordered_map<string, Monkey> & graph, const string & monkey)
+tuple<long long, bool> yell(unordered_map<string, Monkey> & graph, const string & monkey)
 {
   auto & currentMonkey = graph[monkey];
   if (currentMonkey.value)
   {
     if (currentMonkey.name == "humn")
-      return make_tuple(*currentMonkey.value, true, "x");
+      return make_tuple(*currentMonkey.value, true);
 
-    return make_tuple(*currentMonkey.value, false, to_string(*currentMonkey.value));
+    return make_tuple(*currentMonkey.value, false);
   }
 
   assert(currentMonkey.childs.size() == 2);
@@ -97,22 +97,18 @@ tuple<long long, bool, string> yell(unordered_map<string, Monkey> & graph, const
   if (currentMonkey.operation == "+")
   {
     result = get<0>(child1) + get<0>(child2);
-    str    = "(" + get<2>(child1) + "+" + get<2>(child2) + ")";
   }
   else if (currentMonkey.operation == "-")
   {
     result = get<0>(child1) - get<0>(child2);
-    str    = "(" + get<2>(child1) + "-" + get<2>(child2) + ")";
   }
   else if (currentMonkey.operation == "*")
   {
     result = get<0>(child1) * get<0>(child2);
-    str    = "(" + get<2>(child1) + "*" + get<2>(child2) + ")";
   }
   else if (currentMonkey.operation == "/")
   {
     result = get<0>(child1) / get<0>(child2);
-    str    = "(" + get<2>(child1) + "/" + get<2>(child2) + ")";
   }
   else
   {
@@ -125,7 +121,47 @@ tuple<long long, bool, string> yell(unordered_map<string, Monkey> & graph, const
     currentMonkey.value = result;
   }
 
-  return make_tuple(result, fromHumn, str);
+  return make_tuple(result, fromHumn);
+};
+
+long long solveEquation(optional<long long> a,
+                        const string &      operation,
+                        optional<long long> b,
+                        long long           result)
+{
+  assert(a.has_value() ^ b.has_value());
+
+  if (operation == "+")
+  {
+    if (!a)
+      return result - *b;
+    else
+      return result - *a;
+  }
+  else if (operation == "*")
+  {
+    if (!a)
+      return result / *b;
+    else
+      return result / *a;
+  }
+  else if (operation == "/")
+  {
+    if (!a)
+      return result * *b;
+    else
+      return *a / result;
+  }
+  else if (operation == "-")
+  {
+    if (!a)
+      return result + *b;
+    else
+      return -result + *a;
+  }
+
+  assert(false);
+  return 0;
 };
 
 int main()
@@ -137,22 +173,31 @@ int main()
   auto          lines = reader.ReadLines();
 
   auto graph = ParseInput(lines);
+
+  // part 1
   cout << get<0>(yell(graph, "root")) << endl;
 
   // part 2
-  graph["humn"].value = 3876907167495;
-
-  const auto & child1 = yell(graph, graph["root"].childs[0]);
-  const auto & child2 = yell(graph, graph["root"].childs[1]);
-
-  out << get<2>(child1).c_str() << endl;
-  out << get<2>(child2).c_str() << endl;
-
-  if (get<0>(child1) == get<0>(child2))
+  auto getChildMonkeys = [&](const string & node) -> pair<Monkey *, Monkey *>
   {
-    cout << *graph["humn"].value << endl;
-    return 0;
+    return { &graph[graph[node].childs[0]], &graph[graph[node].childs[1]] };
+  };
+
+  string node                = "root"s;
+  auto [rootLeft, rootRight] = getChildMonkeys(node);
+
+  long long humn      = 2 * rootLeft->value.value_or(*rootRight->value);
+  graph["humn"].value = nullopt;
+
+  while (node != "humn")
+  {
+    auto [left, right] = getChildMonkeys(node);
+
+    humn = solveEquation(left->value, graph[node].operation, right->value, humn);
+    node = (!left->value.has_value() ? left->name : right->name);
   }
+
+  cout << humn << endl;
 
   return 0;
 }
