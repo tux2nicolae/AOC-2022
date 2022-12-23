@@ -285,7 +285,7 @@ int main()
             GetDirectionCost(robot.GetArrowDirection());
 
   FStreamWriter writter(out);
-  writter.WriteLines(monkyeMap.data);
+  // writter.WriteLines(monkyeMap.data);
 
   // after translating back to original imput positions are
   // 127 * 1000 + 4*3 + 0 = 127012
