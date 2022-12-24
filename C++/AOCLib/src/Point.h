@@ -21,7 +21,7 @@ struct Point
   long long &       operator[](size_t pos);
   const long long & operator[](size_t pos) const;
 
-  bool IsInBoundary(const Point & from, const Point & to);
+  bool IsInBoundary(const Point & from, const Point & to) const;
 
   Point GetLeft() const;
   Point GetRight() const;

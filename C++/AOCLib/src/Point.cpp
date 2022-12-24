@@ -98,7 +98,7 @@ const long long & AOC::Point::operator[](size_t pos) const
   return kInvalid;
 }
 
-bool AOC::Point::IsInBoundary(const Point & from, const Point & to)
+bool AOC::Point::IsInBoundary(const Point & from, const Point & to) const
 {
   return (x >= from.x && y >= from.y && z >= from.z && w >= from.w && x <= to.x && y <= to.y &&
           z <= to.z && w <= to.w);
